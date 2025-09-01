@@ -20,6 +20,7 @@ public class Main {
                 case 8 -> updateSubtask();
                 case 9 -> deleteById();
                 case 10 -> deleteAll();
+                case 11 -> setStatus();
                 case 0 -> {
                     System.out.println("Пока!");
                     return;
@@ -42,6 +43,7 @@ public class Main {
         System.out.println("8. Обновить SubTask");
         System.out.println("9. Удалить по id (Task/Epic/SubTask)");
         System.out.println("10. Очистить всё (Tasks/Epics/SubTasks)");
+        System.out.println("11. Изменить статус (Tasks/SubTasks)");
         System.out.println("0. Выход");
     }
 
@@ -136,6 +138,24 @@ public class Main {
         System.out.println("Готово.");
     }
 
+    private static void setStatus() {
+        int type = readInt("Кому изменить статус? 1-Task, 2-SubTask: ");
+        int id = readInt("id: ");
+        switch (type) {
+            case 1 -> {
+                Status status = readStatus("На какой статус изменить? 1-NEW, 2-IN_PROGRESS, 3-DONE: ");
+                manager.setTaskStatus(id, status);
+            }
+            case 2 -> {
+                Status status = readStatus("На какой статус изменить? 1-NEW, 2-IN_PROGRESS, 3-DONE: ");
+                manager.setSubTaskStatus(id, status);
+            }
+            default -> System.out.println("Неизвестный тип.");
+        }
+        System.out.println("Готово.");
+    }
+
+
     private static void deleteAll() {
         int type = readInt("Что очистить? 1-Tasks, 2-Epics (с подзадачами), 3-SubTasks: ");
         switch (type) {
@@ -177,10 +197,14 @@ public class Main {
         while (true) {
             int idx = readInt(prompt);
             switch (idx) {
-                case 0: return Status.NEW;
-                case 1: return Status.IN_PROGRESS;
-                case 2: return Status.DONE;
-                default: System.out.println("0, 1 или 2.");
+                case 1:
+                    return Status.NEW;
+                case 2:
+                    return Status.IN_PROGRESS;
+                case 3:
+                    return Status.DONE;
+                default:
+                    System.out.println("1, 2 или 3.");
             }
         }
     }

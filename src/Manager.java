@@ -155,5 +155,18 @@ public class Manager {
         return subTasks;
     }
 
+    public void setTaskStatus(int id, Status status) {
+        Task t = taskHashMap.get(id);
+        if (t == null) throw new IllegalArgumentException("Task не найден: " + id);
+        t.setStatus(status);
+    }
+
+    public void setSubTaskStatus(int id, Status status) {
+        SubTask st = subTaskHashMap.get(id);
+        if (st == null) throw new IllegalArgumentException("SubTask не найден: " + id);
+        st.setStatus(status);
+        recalcEpicStatus(st.getEpicId());
+    }
+
 
 }
