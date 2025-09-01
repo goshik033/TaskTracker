@@ -4,8 +4,8 @@ import java.util.List;
 
 public class Manager {
     private final HashMap<Integer, Task> taskHashMap = new HashMap<>();
-    private final HashMap<Integer, Epic> epicHashMap= new HashMap<>();
-    private final HashMap<Integer, SubTask> subTaskHashMap= new HashMap<>();
+    private final HashMap<Integer, Epic> epicHashMap = new HashMap<>();
+    private final HashMap<Integer, SubTask> subTaskHashMap = new HashMap<>();
     private int id = 0;
 
     public int nextId() {
@@ -99,8 +99,9 @@ public class Manager {
 
     public boolean updateEpic(int id, Epic epic) {
         if (!epicHashMap.containsKey(id)) return false;
-        epic.setId(id);
-        epicHashMap.replace(id, epic);
+        Epic e = epicHashMap.get(id);
+        e.setName(epic.getName());
+        e.setDescription(epic.getDescription());
         recalcEpicStatus(epic.getId());
         return true;
     }
@@ -143,10 +144,13 @@ public class Manager {
     }
 
     public List<SubTask> getEpicsSubTasks(int id) {
-        List<Integer> list = epicHashMap.get(id).getSubtaskIds();
+        Epic e = epicHashMap.get(id);
+        if (e == null) return List.of();
+        List<Integer> list = e.getSubtaskIds();
         List<SubTask> subTasks = new ArrayList<>();
         for (int sid : list) {
-            subTasks.add(subTaskHashMap.get(sid));
+            SubTask s = subTaskHashMap.get(sid);
+            if (s != null) subTasks.add(s);
         }
         return subTasks;
     }

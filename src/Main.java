@@ -42,7 +42,6 @@ public class Main {
         System.out.println("8. Обновить SubTask");
         System.out.println("9. Удалить по id (Task/Epic/SubTask)");
         System.out.println("10. Очистить всё (Tasks/Epics/SubTasks)");
-        System.out.println("11. История просмотров");
         System.out.println("0. Выход");
     }
 
