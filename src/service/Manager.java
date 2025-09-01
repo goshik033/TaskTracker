@@ -1,3 +1,8 @@
+package service;
+
+import model.*;
+
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,17 +25,17 @@ public class Manager {
 
     public int addEpic(Epic epic) {
         epic.setId(nextId());
-        epic.setSubtaskIds(new ArrayList<>());
+        epic.setSubTaskIds(new ArrayList<>());
         epicHashMap.put(epic.getId(), epic);
         return epic.getId();
     }
 
     public int addSubtask(SubTask subTask) {
         Epic epic = epicHashMap.get(subTask.getEpicId());
-        if (epic == null) throw new IllegalArgumentException("Epic not found: " + subTask.getEpicId());
+        if (epic == null) throw new IllegalArgumentException("model.Epic not found: " + subTask.getEpicId());
         subTask.setId(nextId());
         subTaskHashMap.put(subTask.getId(), subTask);
-        epic.getSubtaskIds().add(subTask.getId());
+        epic.getSubTaskIds().add(subTask.getId());
         recalcEpicStatus(epic.getId());
         return subTask.getId();
     }
@@ -38,7 +43,7 @@ public class Manager {
     private void recalcEpicStatus(int epicId) {
         Epic e = epicHashMap.get(epicId);
         if (e == null) return;
-        List<Integer> ids = e.getSubtaskIds();
+        List<Integer> ids = e.getSubTaskIds();
         if (ids.isEmpty()) {
             e.setStatus(Status.NEW);
             return;
@@ -77,7 +82,7 @@ public class Manager {
     public void deleteEpic(int id) {
         Epic e = epicHashMap.remove(id);
         if (e == null) return;
-        for (int sid : e.getSubtaskIds()) subTaskHashMap.remove(sid);
+        for (int sid : e.getSubTaskIds()) subTaskHashMap.remove(sid);
     }
 
     public void deleteSubtask(int id) {
@@ -85,7 +90,7 @@ public class Manager {
         if (s == null) return;
         Epic e = epicHashMap.get(s.getEpicId());
         if (e != null) {
-            e.getSubtaskIds().remove(Integer.valueOf(id));
+            e.getSubTaskIds().remove(Integer.valueOf(id));
             recalcEpicStatus(e.getId());
         }
     }
@@ -138,7 +143,7 @@ public class Manager {
     public void deleteAllSubTasks() {
         subTaskHashMap.clear();
         for (Epic e : epicHashMap.values()) {
-            e.getSubtaskIds().clear();
+            e.getSubTaskIds().clear();
             e.setStatus(Status.NEW);
         }
     }
@@ -146,7 +151,7 @@ public class Manager {
     public List<SubTask> getEpicsSubTasks(int id) {
         Epic e = epicHashMap.get(id);
         if (e == null) return List.of();
-        List<Integer> list = e.getSubtaskIds();
+        List<Integer> list = e.getSubTaskIds();
         List<SubTask> subTasks = new ArrayList<>();
         for (int sid : list) {
             SubTask s = subTaskHashMap.get(sid);
@@ -157,13 +162,13 @@ public class Manager {
 
     public void setTaskStatus(int id, Status status) {
         Task t = taskHashMap.get(id);
-        if (t == null) throw new IllegalArgumentException("Task не найден: " + id);
+        if (t == null) throw new IllegalArgumentException("model.Task не найден: " + id);
         t.setStatus(status);
     }
 
     public void setSubTaskStatus(int id, Status status) {
         SubTask st = subTaskHashMap.get(id);
-        if (st == null) throw new IllegalArgumentException("SubTask не найден: " + id);
+        if (st == null) throw new IllegalArgumentException("model.SubTask не найден: " + id);
         st.setStatus(status);
         recalcEpicStatus(st.getEpicId());
     }
