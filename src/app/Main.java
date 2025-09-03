@@ -31,6 +31,7 @@ public class Main {
                 case 10 -> deleteAll();
                 case 11 -> setStatus();
                 case 12 -> showById();
+                case 13 -> showHistory();
                 case 0 -> {
                     System.out.println("Пока!");
                     return;
@@ -55,7 +56,11 @@ public class Main {
         System.out.println("10. Очистить всё (Tasks/Epics/SubTasks)");
         System.out.println("11. Изменить статус (Tasks/SubTasks)");
         System.out.println("12. Показать по id ( Task/ Epic/ SubTask)");
+        System.out.println("13. Показать историю");
         System.out.println("0. Выход");
+    }
+    private static void showHistory(){
+        System.out.println(manager.showHistory());
     }
 
 

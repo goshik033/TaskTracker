@@ -7,7 +7,7 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "model.Epic{" +
+        return "Epic{" +
                 "subTaskIds=" + subTaskIds +
                 "} " + super.toString();
     }

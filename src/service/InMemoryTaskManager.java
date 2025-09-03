@@ -8,11 +8,15 @@ import model.Task;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final HashMap<Integer, Task> taskHashMap = new HashMap<>();
-    private final HashMap<Integer, Epic> epicHashMap = new HashMap<>();
-    private final HashMap<Integer, SubTask> subTaskHashMap = new HashMap<>();
+    private final Map<Integer, Task> taskHashMap = new HashMap<>();
+    private final Map<Integer, Epic> epicHashMap = new HashMap<>();
+    private final Map<Integer, SubTask> subTaskHashMap = new HashMap<>();
+    private final List<Task> history = new ArrayList<>();
+    private int histurySize = 10;
+    private int idx = 0;
     private int id = 0;
 
     public int nextId() {
@@ -67,17 +71,25 @@ public class InMemoryTaskManager implements TaskManager {
 
 
     public Task getTask(int id) {
+
+        history.add(idx, taskHashMap.get(id));
+        idx = (1 + idx) % histurySize;
         return taskHashMap.get(id);
     }
 
 
     public Epic getEpic(int id) {
+        history.add(epicHashMap.get(id));
+        idx = (1 + idx) % histurySize;
 
         return epicHashMap.get(id);
     }
 
 
     public SubTask getSubTask(int id) {
+        idx = (1 + idx) % histurySize;
+        history.add(subTaskHashMap.get(id));
+
         return subTaskHashMap.get(id);
     }
 
@@ -194,6 +206,9 @@ public class InMemoryTaskManager implements TaskManager {
         if (st == null) throw new IllegalArgumentException("model.SubTask не найден: " + id);
         st.setStatus(status);
         recalcEpicStatus(st.getEpicId());
+    }
+    public List<Task> showHistory(){
+        return history;
     }
 
 

@@ -50,6 +50,7 @@ public interface TaskManager {
     void setTaskStatus(int id, Status status);
 
     void setSubTaskStatus(int id, Status status);
+    List<Task> showHistory();
 
 
 }
