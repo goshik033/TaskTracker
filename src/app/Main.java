@@ -5,6 +5,7 @@ import model.Status;
 import model.SubTask;
 import model.Task;
 import service.InMemoryTaskManager;
+import service.Managers;
 import service.TaskManager;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.Scanner;
 
 public class Main {
     private static final Scanner in = new Scanner(System.in);
-    private static final TaskManager manager = new InMemoryTaskManager();
+    private static final TaskManager manager = Managers.getDefault();
 
     public static void main(String[] args) {
         while (true) {
@@ -59,7 +60,8 @@ public class Main {
         System.out.println("13. Показать историю");
         System.out.println("0. Выход");
     }
-    private static void showHistory(){
+
+    private static void showHistory() {
         System.out.println(manager.showHistory());
     }
 
@@ -148,6 +150,7 @@ public class Main {
         }
         System.out.println("Готово.");
     }
+
     private static void showById() {
         int type = readInt("Что посмотреть ? 1-Task, 2-Epic, 3-SubTask: ");
         int id = readInt("id: ");
