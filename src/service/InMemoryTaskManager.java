@@ -5,15 +5,12 @@ import model.Status;
 import model.SubTask;
 import model.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
-    private final Map<Integer, Task> taskHashMap = new HashMap<>();
-    private final Map<Integer, Epic> epicHashMap = new HashMap<>();
-    private final Map<Integer, SubTask> subTaskHashMap = new HashMap<>();
+    private final Map<Integer, Task> taskHashMap = new LinkedHashMap<>();
+    private final Map<Integer, Epic> epicHashMap = new LinkedHashMap<>();
+    private final Map<Integer, SubTask> subTaskHashMap = new LinkedHashMap<>();
     private final HistoryManager historyManager = Managers.getDefaultHistory();
 
     private int id = 0;
@@ -71,21 +68,21 @@ public class InMemoryTaskManager implements TaskManager {
 
     public Task getTask(int id) {
         Task task = taskHashMap.get(id);
-        historyManager.add(task);
+        if (task != null) historyManager.add(task);
         return task;
     }
 
 
     public Epic getEpic(int id) {
         Epic epic = epicHashMap.get(id);
-        historyManager.add(epic);
+        if (epic != null) historyManager.add(epic);
         return epic;
     }
 
 
     public SubTask getSubTask(int id) {
         SubTask subTask = subTaskHashMap.get(id);
-        historyManager.add(subTask);
+        if (subTask != null) historyManager.add(subTask);
         return subTask;
     }
 
@@ -126,7 +123,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic e = epicHashMap.get(id);
         e.setName(epic.getName());
         e.setDescription(epic.getDescription());
-        recalcEpicStatus(epic.getId());
+        recalcEpicStatus(id);
         return true;
     }
 
@@ -136,7 +133,7 @@ public class InMemoryTaskManager implements TaskManager {
         SubTask st = subTaskHashMap.get(id);
         st.setName(subTask.getName());
         st.setDescription(subTask.getDescription());
-        recalcEpicStatus(subTask.getEpicId());
+        recalcEpicStatus(st.getEpicId());
         return true;
     }
 
@@ -204,7 +201,7 @@ public class InMemoryTaskManager implements TaskManager {
         recalcEpicStatus(st.getEpicId());
     }
 
-    public List<Task> showHistory() {
+    public List<Task> getHistory() {
         return historyManager.getHistory();
     }
 

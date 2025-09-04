@@ -6,8 +6,8 @@ public class SubTask extends Task {
     @Override
     public String toString() {
         return "SubTask{" +
-                "epicId=" + epicId +
-                "} " + super.toString();
+                "epicId=" + epicId +", "
+                + super.toString().substring(5);
     }
 
     public SubTask() {

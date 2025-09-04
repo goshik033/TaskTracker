@@ -4,10 +4,11 @@ import model.Epic;
 import model.Status;
 import model.SubTask;
 import model.Task;
-import service.InMemoryTaskManager;
 import service.Managers;
 import service.TaskManager;
 
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Scanner;
 
@@ -32,7 +33,7 @@ public class Main {
                 case 10 -> deleteAll();
                 case 11 -> setStatus();
                 case 12 -> showById();
-                case 13 -> showHistory();
+                case 13 -> getHistory();
                 case 0 -> {
                     System.out.println("Пока!");
                     return;
@@ -61,8 +62,13 @@ public class Main {
         System.out.println("0. Выход");
     }
 
-    private static void showHistory() {
-        System.out.println(manager.showHistory());
+    private static void getHistory() {
+        List<Task> history = manager.getHistory();
+        if (history == null || history.isEmpty()) {
+            System.out.println("история пуста");
+            return;
+        }
+        System.out.println(history);
     }
 
 
