@@ -18,8 +18,22 @@ public class InMemoryTaskManager implements TaskManager {
     public int nextId() {
         return id++;
     }
-    public void nextId(int oldId) {
-        id = oldId;
+    public void setCurrentId (int oldId) {
+        id = oldId+1;
+    }
+
+    protected void putTask(Task t) {
+        taskHashMap.put(t.getId(), t);
+    }
+    protected void putEpic(Epic e) {
+        if (e.getSubTaskIds() == null) e.setSubTaskIds(new ArrayList<>());
+        epicHashMap.put(e.getId(), e);
+    }
+    protected void putSubTask(SubTask s) {
+        Epic e = epicHashMap.get(s.getEpicId());
+        if (e == null) throw new IllegalStateException("Epic " + s.getEpicId() + " not loaded yet");
+        subTaskHashMap.put(s.getId(), s);
+        e.getSubTaskIds().add(s.getId());
     }
 
     @Override
@@ -115,8 +129,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public boolean updateTask(int id, Task task) {
         if (!taskHashMap.containsKey(id)) return false;
-        task.setId(id);
-        taskHashMap.replace(id, task);
+        Task t = taskHashMap.get(id);
+        t.setName(task.getName());
+        t.setDescription(task.getDescription());
         return true;
     }
 
@@ -136,7 +151,7 @@ public class InMemoryTaskManager implements TaskManager {
         SubTask st = subTaskHashMap.get(id);
         st.setName(subTask.getName());
         st.setDescription(subTask.getDescription());
-        recalcEpicStatus(st.getEpicId());
+        recalcEpicStatus(subTask.getEpicId();
         return true;
     }
 

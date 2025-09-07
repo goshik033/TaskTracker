@@ -11,15 +11,17 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
 
-    private final HistoryManager historyManager = Managers.getDefaultHistory();
 
     private final Path file;
+    private boolean loading = false;
+
 
     public FileBackedTasksManager(Path file) {
         this.file = file;
@@ -40,17 +42,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             writer.flush();
 
         } catch (IOException e) {
-            throw new RuntimeException("Не удалось сохранить данные в файле", e.getCause());
+            throw new ManagerSaveException("Не удалось сохранить данные в файле" + file, e);
         }
     }
 
     private void load() {
+
         try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+            String header = reader.readLine(); // "id,type,name,status,description,epic"
+            if (header == null) return;
 
             int maxId = -1;
-            String line = reader.readLine();
-            line = reader.readLine();
-            while (line != null && !line.isBlank()) {
+            String line;
+            while ((line = reader.readLine()) != null && !line.isBlank()) {
                 String[] split = line.split(",");
                 int id = Integer.parseInt(split[0]);
                 String name = split[2];
@@ -60,23 +64,23 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                     case "SUBTASK" -> {
                         int epicId = Integer.parseInt(split[5]);
                         SubTask subTask = new SubTask(id, name, description, status, epicId);
-                        addSubTask(subTask);
+                        putSubTask(subTask);
                     }
                     case "EPIC" -> {
-                        List<Integer> subTaskIds = Arrays.stream(split[6].split(" ")).map(Integer::parseInt).toList();
-                        Epic epic = new Epic(id, name, description, status, subTaskIds);
-                        addEpic(epic);
+
+                        Epic epic = new Epic(id, name, description, status);
+                        putEpic(epic);
                     }
                     case "TASK" -> {
                         Task task = new Task(id, name, description, status);
-                        addTask(task);
+                        putTask(task);
                     }
                 }
                 maxId = Math.max(maxId, id);
-                line = reader.readLine();
+
 
             }
-            nextId(maxId);
+            setCurrentId(maxId);
             String historyLine = reader.readLine();
             if (historyLine != null && !historyLine.isBlank()) {
                 for (String idStr : historyLine.split(",")) {
@@ -92,14 +96,14 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             }
 
         } catch (IOException e) {
-            throw new RuntimeException("Не удалось прочитать данные в файле", e.getCause());
+            throw new ManagerSaveException("Не удалось прочитать данные в файле" + file, e);
         }
     }
 
 
     private String serializeToCsv() {
         StringBuilder sb = new StringBuilder();
-        sb.append("id,type,name,status,description,epic,subtasks").append("\n");
+        sb.append("id,type,name,status,description,epic").append("\n");
 
         for (Task t : getAllTasks()) {
             sb.append(taskToCsv(t)).append("\n");
@@ -117,20 +121,17 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     private String taskToCsv(Task task) {
-        String name = escape(task.getName());
-        String desc = escape(task.getDescription());
+        String name = task.getName();
+        String desc = task.getDescription();
         if (task instanceof SubTask s) {
             return String.format("%d,SUBTASK,%s,%s,%s,%d",
                     task.getId(), name, task.getStatus(), desc, s.getEpicId());
         } else if (task instanceof Epic e) {
-            String subIds = e.getSubTaskIds().stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(" "));
-            return String.format("%d,EPIC,%s,%s,%s,%s,%s",
-                    task.getId(), name, task.getStatus(), desc, "", subIds);
+            return String.format("%d,EPIC,%s,%s,%s,",
+                    task.getId(), name, task.getStatus(), desc);
 
         } else {
-            System.out.println(task.getStatus()+" "+ task.getId());
+            System.out.println(task.getStatus() + " " + task.getId());
             return String.format("%d,TASK,%s,%s,%s,",
                     task.getId(), name, task.getStatus(), desc);
         }
@@ -146,12 +147,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         }
         return sb.toString();
     }
-
-    private String escape(String s) {
-        if (s == null) return "";
-        return s.replace("\n", " ").replace(",", "\\,");
-    }
-
 
     @Override
     public List<Task> getHistory() {
@@ -187,9 +182,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
 
-
-
-
     @Override
     public Task getTask(int id) {
         Task task = super.getTask(id);
@@ -209,7 +201,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     public SubTask getSubTask(int id) {
         SubTask subTask = super.getSubTask(id);
         save();
-
         return subTask;
     }
 
@@ -270,16 +261,19 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     @Override
     public void deleteAllTasks() {
         super.deleteAllTasks();
+        save();
     }
 
     @Override
     public void deleteAllEpics() {
         super.deleteAllEpics();
+        save();
     }
 
     @Override
     public void deleteAllSubTasks() {
         super.deleteAllSubTasks();
+        save();
     }
 
     @Override

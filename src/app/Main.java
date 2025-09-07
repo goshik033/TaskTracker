@@ -14,8 +14,8 @@ import java.util.Scanner;
 
 public class Main {
     private static final Scanner in = new Scanner(System.in);
-    private static Path path = Paths.get("tasks.csv");
-    private static final TaskManager manager = Managers.getDefaultFileManager(path);
+    private static final Path PATH = Paths.get("tasks.csv");
+    private static final TaskManager manager = Managers.getDefaultFileManager(PATH);
 
     public static void main(String[] args) {
         while (true) {
