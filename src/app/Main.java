@@ -7,14 +7,15 @@ import model.Task;
 import service.Managers;
 import service.TaskManager;
 
-import java.util.ArrayList;
-import java.util.Deque;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
     private static final Scanner in = new Scanner(System.in);
-    private static final TaskManager manager = Managers.getDefault();
+    private static Path path = Paths.get("tasks.csv");
+    private static final TaskManager manager = Managers.getDefaultFileManager(path);
 
     public static void main(String[] args) {
         while (true) {
@@ -94,7 +95,7 @@ public class Main {
         s.setEpicId(epicId);
         s.setName(readLine("Название подзадачи: "));
         s.setDescription(readLine("Описание: "));
-        int id = manager.addSubtask(s);
+        int id = manager.addSubTask(s);
         System.out.println(" SubTask создан, id=" + id);
     }
 

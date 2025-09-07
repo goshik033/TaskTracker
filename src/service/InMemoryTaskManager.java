@@ -18,6 +18,9 @@ public class InMemoryTaskManager implements TaskManager {
     public int nextId() {
         return id++;
     }
+    public void nextId(int oldId) {
+        id = oldId;
+    }
 
     @Override
     public int addTask(Task task) {
@@ -35,7 +38,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int addSubtask(SubTask subTask) {
+    public int addSubTask(SubTask subTask) {
         Epic epic = epicHashMap.get(subTask.getEpicId());
         if (epic == null) throw new IllegalArgumentException("model.Epic not found: " + subTask.getEpicId());
         subTask.setId(nextId());
@@ -203,6 +206,16 @@ public class InMemoryTaskManager implements TaskManager {
 
     public List<Task> getHistory() {
         return historyManager.getHistory();
+    }
+
+    protected boolean hasTask(int id){
+        return taskHashMap.containsKey(id);
+    }
+    protected boolean hasSubTask(int id){
+        return subTaskHashMap.containsKey(id);
+    }
+    protected boolean hasEpic(int id){
+        return epicHashMap.containsKey(id);
     }
 
 
