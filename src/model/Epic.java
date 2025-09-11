@@ -14,7 +14,7 @@ public class Epic extends Task {
     }
 
     public Epic() {
-        super(); // по умолчанию
+        super();
     }
 
     public Epic(int id, String name, String description,Status status) {

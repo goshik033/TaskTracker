@@ -99,7 +99,7 @@ public class Main {
         System.out.println(" SubTask создан, id=" + id);
     }
 
-    // -------- READ/LIST --------
+
     private static void listAll() {
         System.out.println("-- Tasks --");
         printList(manager.getAllTasks());

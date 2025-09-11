@@ -5,6 +5,7 @@ import model.Status;
 import model.SubTask;
 import model.Task;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TaskManager {
@@ -52,6 +53,7 @@ public interface TaskManager {
     void setSubTaskStatus(int id, Status status);
 
     List<Task> getHistory();
+
 
 
 }

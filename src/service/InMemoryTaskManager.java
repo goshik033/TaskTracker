@@ -5,6 +5,7 @@ import model.Status;
 import model.SubTask;
 import model.Task;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -21,6 +22,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void setCurrentId (int oldId) {
         id = oldId+1;
     }
+
 
     protected void putTask(Task t) {
         taskHashMap.put(t.getId(), t);
@@ -151,7 +153,7 @@ public class InMemoryTaskManager implements TaskManager {
         SubTask st = subTaskHashMap.get(id);
         st.setName(subTask.getName());
         st.setDescription(subTask.getDescription());
-        recalcEpicStatus(subTask.getEpicId();
+        recalcEpicStatus(subTask.getEpicId());
         return true;
     }
 

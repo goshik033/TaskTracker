@@ -1,10 +1,16 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 public  class Task {
     private int id;
     private String name;
     private String description;
     private Status status;
+    private LocalDateTime startTime;
+    private Duration duration;
     public Task() {
         this.status = Status.NEW; // по умолчанию
     }
@@ -19,6 +25,19 @@ public  class Task {
         this.name = name;
         this.description = description;
         this.status = status;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return id == task.id && Objects.equals(name, task.name) && Objects.equals(description, task.description) && status == task.status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, status);
     }
 
     public int getId() {
@@ -61,5 +80,14 @@ public  class Task {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+    public LocalDateTime getEndTime() {
+        return startTime.plus(duration);
+    }
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+    public void setDuration(Duration duration) {
+        this.duration = duration;
     }
 }
