@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +25,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     private final Path file;
     private boolean loading = false;
+    private static final DateTimeFormatter DATE_TIME_FMT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
 
     public FileBackedTasksManager(Path file) {
@@ -61,19 +66,22 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                 String name = split[2];
                 Status status = Status.valueOf(split[3]);
                 String description = split[4];
+                LocalDateTime startTime = split[5].isEmpty() ? null: LocalDateTime.parse(split[5], DATE_TIME_FMT);
+                Duration duration = split[6].isEmpty()? null: Duration.ofMinutes(Long.parseLong(split[6]));
                 switch (split[1]) {
                     case "SUBTASK" -> {
                         int epicId = Integer.parseInt(split[5]);
-                        SubTask subTask = new SubTask(id, name, description, status, epicId);
+
+                        SubTask subTask = new SubTask(id, name, description, status, startTime, duration, epicId);
                         putSubTask(subTask);
                     }
                     case "EPIC" -> {
 
-                        Epic epic = new Epic(id, name, description, status);
+                        Epic epic = new Epic(id, name, description, status, startTime, duration);
                         putEpic(epic);
                     }
                     case "TASK" -> {
-                        Task task = new Task(id, name, description, status);
+                        Task task = new Task(id, name, description, status, startTime, duration);
                         putTask(task);
                     }
                 }
@@ -104,7 +112,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
     private String serializeToCsv() {
         StringBuilder sb = new StringBuilder();
-        sb.append("id,type,name,status,description,epic").append("\n");
+        sb.append("id,type,name,status,description,start,dur,epic").append("\n");
 
         for (Task t : getAllTasks()) {
             sb.append(taskToCsv(t)).append("\n");
@@ -124,17 +132,21 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     private String taskToCsv(Task task) {
         String name = task.getName();
         String desc = task.getDescription();
+        String start = task.getStartTime() == null ? "" : task.getStartTime().format(DATE_TIME_FMT);
+        String dur = task.getDuration() == null ? "" : String.valueOf(task.getDuration().toMinutes());
+
+
         if (task instanceof SubTask s) {
-            return String.format("%d,SUBTASK,%s,%s,%s,%d",
-                    task.getId(), name, task.getStatus(), desc, s.getEpicId());
+            return String.format("%d,SUBTASK,%s,%s,%s,%s,%s,%d",
+                    task.getId(), name, task.getStatus(), desc, start, dur, s.getEpicId());
         } else if (task instanceof Epic e) {
-            return String.format("%d,EPIC,%s,%s,%s,",
-                    task.getId(), name, task.getStatus(), desc);
+            return String.format("%d,SUBTASK,%s,%s,%s,%s,%s,",
+                    task.getId(), name, task.getStatus(), desc, start, dur);
 
         } else {
             System.out.println(task.getStatus() + " " + task.getId());
-            return String.format("%d,TASK,%s,%s,%s,",
-                    task.getId(), name, task.getStatus(), desc);
+            return String.format("%d,SUBTASK,%s,%s,%s,%s,%s,",
+                    task.getId(), name, task.getStatus(), desc, start, dur);
         }
     }
 

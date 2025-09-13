@@ -7,7 +7,6 @@ import model.Task;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.Year;
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -57,18 +56,18 @@ public class InMemoryTaskManager implements TaskManager {
 
 
     protected void putTask(Task t) {
-        taskHashMap.put(t.getId(), t);
+        putAuto(t);
     }
 
     protected void putEpic(Epic e) {
         if (e.getSubTaskIds() == null) e.setSubTaskIds(new ArrayList<>());
-        epicHashMap.put(e.getId(), e);
+        putAuto(e);
     }
 
     protected void putSubTask(SubTask s) {
         Epic e = epicHashMap.get(s.getEpicId());
         if (e == null) throw new IllegalStateException("Epic " + s.getEpicId() + " not loaded yet");
-        subTaskHashMap.put(s.getId(), s);
+        putAuto(s);
         e.getSubTaskIds().add(s.getId());
     }
 
@@ -224,16 +223,19 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
 
-
     private void releaseIfReserved(Task t) {
         prioritized.remove(t);
 
         LocalDateTime s = t.getStartTime();
         Duration d = t.getDuration();
         if (s != null && d != null && !d.isZero()) {
-            try { timeGridArray.release(s, d); } catch (IllegalArgumentException ignored) {}
+            try {
+                timeGridArray.release(s, d);
+            } catch (IllegalArgumentException ignored) {
+            }
         }
     }
+
     private void changeReservation(Task oldTask, Task newTask) {
         releaseIfReserved(oldTask);
         LocalDateTime s = newTask.getStartTime();
@@ -263,7 +265,7 @@ public class InMemoryTaskManager implements TaskManager {
         Task t = taskHashMap.get(id);
         t.setName(task.getName());
         t.setDescription(task.getDescription());
-        changeReservation(t,task);
+        changeReservation(t, task);
         return true;
     }
 
@@ -287,7 +289,7 @@ public class InMemoryTaskManager implements TaskManager {
         st.setDescription(subTask.getDescription());
         recalcEpicStatus(subTask.getEpicId());
         recalcEpicTime(subTask.getEpicId());
-        changeReservation(st,subTask);
+        changeReservation(st, subTask);
         return true;
     }
 
@@ -434,6 +436,52 @@ public class InMemoryTaskManager implements TaskManager {
             }
         } catch (IllegalArgumentException e) {
             return OptionalInt.empty();
+        }
+    }
+
+    private void putAuto(Task entity) {
+
+        boolean isSub = entity instanceof SubTask;
+        boolean isEpic = entity instanceof Epic;
+
+        LocalDateTime start = isEpic ? null : entity.getStartTime();
+        Duration dur = isEpic ? null : entity.getDuration();
+
+
+        if (start == null || dur == null || dur.isZero()) {
+            if (isSub) {
+                SubTask st = (SubTask) entity;
+                subTaskHashMap.put(st.getId(), st);
+                prioritized.add(st);
+            } else if (isEpic) {
+                Epic e = (Epic) entity;
+                epicHashMap.put(e.getId(), e);
+
+            } else {
+
+                taskHashMap.put(entity.getId(), entity);
+                prioritized.add(entity);
+            }
+        }
+
+        try {
+            if (timeGridArray.tryReserve(start, dur)) {
+
+                if (isSub) {
+                    SubTask st = (SubTask) entity;
+
+                    subTaskHashMap.put(st.getId(), st);
+                    prioritized.add(st);
+                } else {
+
+                    taskHashMap.put(entity.getId(), entity);
+                    prioritized.add(entity);
+                }
+
+            }
+
+        } catch (IllegalArgumentException ignored) {
+
         }
     }
 }
