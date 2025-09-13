@@ -9,13 +9,23 @@ import service.TaskManager;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.Scanner;
+
+import java.time.format.DateTimeFormatter;
+
 
 public class Main {
     private static final Scanner in = new Scanner(System.in);
     private static final Path PATH = Paths.get("tasks.csv");
     private static final TaskManager manager = Managers.getDefaultFileManager(PATH);
+
+    private static final DateTimeFormatter DATE_TIME_FMT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public static void main(String[] args) {
         while (true) {
@@ -75,18 +85,35 @@ public class Main {
 
     private static void createTask() {
         Task t = new Task();
-        t.setName(readLine("Название: "));
-        t.setDescription(readLine("Описание: "));
-        int id = manager.addTask(t);
-        System.out.println(" Task создан, id=" + id);
+        t.setName(readLine("Название: ").trim());
+        t.setDescription(readLine("Описание: ").trim());
+
+        LocalDateTime start = readOptionalDateTime(
+                "Старт (yyyy-MM-dd HH:mm, Enter — без времени): ");
+        Duration dur = readOptionalDurationMinutes(
+                "Длительность (мин, Enter — без длительности): ");
+
+        t.setStartTime(start);
+        t.setDuration(dur);
+
+        OptionalInt id = manager.addTask(t);
+        if (id.isPresent()) {
+            System.out.println("Task создан, id=" + id.getAsInt());
+        } else {
+            System.out.println("Задача НЕ создана: некорректные данные или пересечение по времени.");
+        }
     }
 
     private static void createEpic() {
         Epic e = new Epic();
         e.setName(readLine("Название эпика: "));
         e.setDescription(readLine("Описание: "));
-        int id = manager.addEpic(e);
-        System.out.println(" Epic создан, id=" + id);
+        OptionalInt id  = manager.addEpic(e);
+        if (id.isPresent()) {
+            System.out.println("Task создан, id=" + id.getAsInt());
+        } else {
+            System.out.println("Задача НЕ создана: некорректные данные.");
+        }
     }
 
     private static void createSubtask() {
@@ -95,8 +122,20 @@ public class Main {
         s.setEpicId(epicId);
         s.setName(readLine("Название подзадачи: "));
         s.setDescription(readLine("Описание: "));
-        int id = manager.addSubTask(s);
-        System.out.println(" SubTask создан, id=" + id);
+        LocalDateTime start = readOptionalDateTime(
+                "Старт (yyyy-MM-dd HH:mm, Enter — без времени): ");
+        Duration dur = readOptionalDurationMinutes(
+                "Длительность (мин, Enter — без длительности): ");
+
+        s.setStartTime(start);
+        s.setDuration(dur);
+
+        OptionalInt id = manager.addSubTask(s);
+        if (id.isPresent()) {
+            System.out.println("SubTask создан, id=" + id.getAsInt());
+        } else {
+            System.out.println("Задача НЕ создана: некорректные данные или пересечение по времени.");
+        };
     }
 
 
@@ -200,7 +239,7 @@ public class Main {
         System.out.println("Готово.");
     }
 
-    // -------- Helpers --------
+
     private static void printList(List<?> list) {
         if (list == null || list.isEmpty()) {
             System.out.println("(пусто)");
@@ -241,4 +280,60 @@ public class Main {
             }
         }
     }
+
+    public static LocalDateTime readOptionalDateTime(String prompt) {
+        while (true) {
+            String s = readLine(prompt).trim();
+            if (s.isEmpty()) return null;
+            try {
+                return LocalDateTime.parse(s, DATE_TIME_FMT);
+            } catch (DateTimeParseException e) {
+                System.out.println("Неверный формат. Пример: 2025-09-13 14:30");
+            }
+        }
+    }
+
+    public static Duration readOptionalDurationMinutes(String prompt) {
+        while (true) {
+            String s = readLine(prompt).trim();
+            if (s.isEmpty()) return null;
+            try {
+                long m = Long.parseLong(s);
+                if (m < 0) {
+                    System.out.println("Длительность не может быть отрицательной.");
+                    continue;
+                }
+                return (m == 0) ? Duration.ZERO : Duration.ofMinutes(m);
+            } catch (NumberFormatException e) {
+                System.out.println("Введите целое число минут (например, 45).");
+            }
+        }
+    }
+
+//    public static LocalDateTime readRequiredDateTime(String prompt) {
+//        while (true) {
+//            try {
+//                return LocalDateTime.parse(readLine(prompt).trim(), DATE_TIME_FMT);
+//            } catch (DateTimeParseException e) {
+//                System.out.println("Неверный формат. Пример: 2025-09-13 14:30");
+//            }
+//        }
+//    }
+//
+//    public static Duration readRequiredDurationMinutes(String prompt) {
+//        while (true) {
+//            try {
+//                long m = Long.parseLong(readLine(prompt).trim());
+//                if (m < 0) {
+//                    System.out.println("Длительность не может быть отрицательной.");
+//                    continue;
+//                }
+//                return (m == 0) ? Duration.ZERO : Duration.ofMinutes(m);
+//            } catch (NumberFormatException e) {
+//                System.out.println("Введите целое число минут (например, 45).");
+//            }
+//        }
+//    }
 }
+
+

@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
@@ -159,8 +160,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     }
 
     @Override
-    public int addTask(Task task) {
-        int id = super.addTask(task);
+    public OptionalInt addTask(Task task) {
+        OptionalInt id = super.addTask(task);
         save();
         return id;
 
@@ -168,15 +169,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
 
 
     @Override
-    public int addEpic(Epic epic) {
-        int id = super.addEpic(epic);
+    public OptionalInt addEpic(Epic epic) {
+        OptionalInt id = super.addEpic(epic);
         save();
         return id;
     }
 
     @Override
-    public int addSubTask(SubTask subTask) {
-        int id = super.addSubTask(subTask);
+    public OptionalInt addSubTask(SubTask subTask) {
+        OptionalInt id = super.addSubTask(subTask);
         save();
         return id;
     }

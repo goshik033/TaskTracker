@@ -7,14 +7,15 @@ import model.Task;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.OptionalInt;
 
 public interface TaskManager {
 
-    int addTask(Task task);
+    OptionalInt addTask(Task task);
 
-    int addEpic(Epic epic);
+    OptionalInt addEpic(Epic epic);
 
-    int addSubTask(SubTask subTask);
+    OptionalInt addSubTask(SubTask subTask);
 
     SubTask getSubTask(int id);
 
@@ -53,6 +54,7 @@ public interface TaskManager {
     void setSubTaskStatus(int id, Status status);
 
     List<Task> getHistory();
+    List<Task> getPrioritizedTasks();
 
 
 
