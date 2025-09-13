@@ -156,7 +156,6 @@ public class Main {
     }
 
 
-    // -------- UPDATE --------
     private static void updateTask() {
         int id = readInt("Task id: ");
         Task t = new Task();
@@ -184,7 +183,7 @@ public class Main {
         System.out.println(ok ? "Обновлено." : "SubTask не найден.");
     }
 
-    // -------- DELETE --------
+
     private static void deleteById() {
         int type = readInt("Что удалить? 1-Task, 2-Epic, 3-SubTask: ");
         int id = readInt("id: ");
@@ -309,31 +308,6 @@ public class Main {
             }
         }
     }
-
-//    public static LocalDateTime readRequiredDateTime(String prompt) {
-//        while (true) {
-//            try {
-//                return LocalDateTime.parse(readLine(prompt).trim(), DATE_TIME_FMT);
-//            } catch (DateTimeParseException e) {
-//                System.out.println("Неверный формат. Пример: 2025-09-13 14:30");
-//            }
-//        }
-//    }
-//
-//    public static Duration readRequiredDurationMinutes(String prompt) {
-//        while (true) {
-//            try {
-//                long m = Long.parseLong(readLine(prompt).trim());
-//                if (m < 0) {
-//                    System.out.println("Длительность не может быть отрицательной.");
-//                    continue;
-//                }
-//                return (m == 0) ? Duration.ZERO : Duration.ofMinutes(m);
-//            } catch (NumberFormatException e) {
-//                System.out.println("Введите целое число минут (например, 45).");
-//            }
-//        }
-//    }
 }
 
 

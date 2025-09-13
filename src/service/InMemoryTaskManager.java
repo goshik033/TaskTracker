@@ -22,6 +22,8 @@ public class InMemoryTaskManager implements TaskManager {
             if (t1.getStartTime() == null && t2.getStartTime() == null) {
                 return Integer.compare(t1.getId(), t2.getId());
             }
+
+
             if (t1.getStartTime() == null) {
                 return 1;
             }
@@ -182,20 +184,36 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteTask(int id) {
-        taskHashMap.remove(id);
+        Task t = taskHashMap.remove(id);
+        if (t == null) return;
+
+        releaseIfReserved(t);
     }
 
     @Override
     public void deleteEpic(int id) {
         Epic e = epicHashMap.remove(id);
         if (e == null) return;
-        for (int sid : e.getSubTaskIds()) subTaskHashMap.remove(sid);
+
+
+        List<Integer> subs = e.getSubTaskIds();
+        if (subs != null) {
+            for (int sid : subs) {
+                SubTask s = subTaskHashMap.remove(sid);
+                if (s == null) continue;
+                releaseIfReserved(s);
+            }
+            subs.clear();
+        }
+
     }
+
 
     @Override
     public void deleteSubtask(int id) {
         SubTask s = subTaskHashMap.remove(id);
         if (s == null) return;
+        releaseIfReserved(s);
         Epic e = epicHashMap.get(s.getEpicId());
         if (e != null) {
             e.getSubTaskIds().remove(Integer.valueOf(id));
@@ -205,12 +223,47 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+
+
+    private void releaseIfReserved(Task t) {
+        prioritized.remove(t);
+
+        LocalDateTime s = t.getStartTime();
+        Duration d = t.getDuration();
+        if (s != null && d != null && !d.isZero()) {
+            try { timeGridArray.release(s, d); } catch (IllegalArgumentException ignored) {}
+        }
+    }
+    private void changeReservation(Task oldTask, Task newTask) {
+        releaseIfReserved(oldTask);
+        LocalDateTime s = newTask.getStartTime();
+        Duration d = newTask.getDuration();
+
+        if (s == null || d == null || d.isZero()) {
+            oldTask.setStartTime(s);
+            oldTask.setDuration(d);
+            prioritized.add(oldTask);
+
+        }
+        try {
+            if (timeGridArray.tryReserve(s, d)) {
+                oldTask.setStartTime(s);
+                oldTask.setDuration(d);
+                prioritized.add(oldTask);
+            }
+        } catch (IllegalArgumentException ignored) {
+
+        }
+
+    }
+
     @Override
     public boolean updateTask(int id, Task task) {
         if (!taskHashMap.containsKey(id)) return false;
         Task t = taskHashMap.get(id);
         t.setName(task.getName());
         t.setDescription(task.getDescription());
+        changeReservation(t,task);
         return true;
     }
 
@@ -234,6 +287,7 @@ public class InMemoryTaskManager implements TaskManager {
         st.setDescription(subTask.getDescription());
         recalcEpicStatus(subTask.getEpicId());
         recalcEpicTime(subTask.getEpicId());
+        changeReservation(st,subTask);
         return true;
     }
 
@@ -255,22 +309,33 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllTasks() {
+        for (Task t : taskHashMap.values()) {
+            releaseIfReserved(t);
+        }
         taskHashMap.clear();
     }
 
     @Override
     public void deleteAllEpics() {
         epicHashMap.clear();
+        for (SubTask s : subTaskHashMap.values()) {
+            releaseIfReserved(s);
+        }
         subTaskHashMap.clear();
     }
 
     @Override
     public void deleteAllSubTasks() {
+        for (SubTask s : subTaskHashMap.values()) {
+            releaseIfReserved(s);
+        }
         subTaskHashMap.clear();
         for (Epic e : epicHashMap.values()) {
             e.getSubTaskIds().clear();
             e.setStatus(Status.NEW);
+            recalcEpicTime(e.getId());
         }
+
     }
 
     @Override
@@ -322,11 +387,11 @@ public class InMemoryTaskManager implements TaskManager {
     private OptionalInt saveAuto(Task entity) {
         if (entity == null) return OptionalInt.empty();
 
-        boolean isSub  = entity instanceof SubTask;
+        boolean isSub = entity instanceof SubTask;
         boolean isEpic = entity instanceof Epic;
 
         java.time.LocalDateTime start = isEpic ? null : entity.getStartTime();
-        java.time.Duration dur        = isEpic ? null : entity.getDuration();
+        java.time.Duration dur = isEpic ? null : entity.getDuration();
 
         if (dur != null && dur.isNegative()) return OptionalInt.empty();
 

@@ -50,7 +50,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
     private void load() {
 
         try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-            String header = reader.readLine(); // "id,type,name,status,description,epic"
+            String header = reader.readLine();
             if (header == null) return;
 
             int maxId = -1;
