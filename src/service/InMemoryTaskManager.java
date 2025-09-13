@@ -62,6 +62,8 @@ public class InMemoryTaskManager implements TaskManager {
     protected void putEpic(Epic e) {
         if (e.getSubTaskIds() == null) e.setSubTaskIds(new ArrayList<>());
         putAuto(e);
+        recalcEpicStatus(e.getId());
+        recalcEpicTime(e.getId());
     }
 
     protected void putSubTask(SubTask s) {
@@ -151,7 +153,8 @@ public class InMemoryTaskManager implements TaskManager {
             SubTask s = subTaskHashMap.get(i);
             if (s.getStartTime() == null || s.getDuration() == null) continue;
             LocalDateTime ss = s.getStartTime();
-            LocalDateTime se = s.getEndTime();
+            LocalDateTime se = s.getEndTime().isPresent() ? s.getEndTime().get() : null;
+
             if (minStart == null || ss.isBefore(minStart)) minStart = ss;
             if (maxEnd == null || (se != null && se.isAfter(maxEnd))) maxEnd = se;
             sum = sum.plus(s.getDuration());

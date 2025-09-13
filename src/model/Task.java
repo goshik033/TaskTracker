@@ -3,6 +3,7 @@ package model;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 public  class Task {
     private int id;
@@ -34,12 +35,12 @@ public  class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id == task.id && Objects.equals(name, task.name) && Objects.equals(description, task.description) && status == task.status;
+        return id == task.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, description, status);
+        return Objects.hashCode(id);
     }
 
     public int getId() {
@@ -83,8 +84,10 @@ public  class Task {
     public void setStatus(Status status) {
         this.status = status;
     }
-    public LocalDateTime getEndTime() {
-        return startTime.plus(duration);
+    public Optional<LocalDateTime> getEndTime() {
+        return (startTime != null && duration != null)
+                ? Optional.of(startTime.plus(duration))
+                : Optional.empty();
     }
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;

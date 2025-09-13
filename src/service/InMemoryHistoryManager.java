@@ -17,7 +17,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private final Map<Integer, Node> map = new HashMap<>();
     //    private final Deque<Task> history = new ArrayDeque<>();
-//    private final static int HISTURY_SIZE = 10;
+    private final static int HISTURY_SIZE = 10;
     private Node head;
     private Node tail;
 

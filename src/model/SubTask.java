@@ -9,9 +9,16 @@ public class SubTask extends Task {
     @Override
     public String toString() {
         return "SubTask{" +
-                "epicId=" + epicId +", "
-                + super.toString().substring(5);
+                "id=" + getId() +
+                ", name='" + getName() + '\'' +
+                ", description='" + getDescription() + '\'' +
+                ", status=" + getStatus() +
+                ", startTime=" + getStartTime() +
+                ", duration=" + getDuration() +
+                ", epicId=" + epicId +
+                '}';
     }
+
 
     public SubTask() {
         super(); // по умолчанию

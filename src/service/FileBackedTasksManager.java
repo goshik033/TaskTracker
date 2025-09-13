@@ -70,7 +70,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
                 Duration duration = split[6].isEmpty()? null: Duration.ofMinutes(Long.parseLong(split[6]));
                 switch (split[1]) {
                     case "SUBTASK" -> {
-                        int epicId = Integer.parseInt(split[5]);
+                        int epicId = Integer.parseInt(split[7]);
 
                         SubTask subTask = new SubTask(id, name, description, status, startTime, duration, epicId);
                         putSubTask(subTask);
@@ -140,12 +140,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             return String.format("%d,SUBTASK,%s,%s,%s,%s,%s,%d",
                     task.getId(), name, task.getStatus(), desc, start, dur, s.getEpicId());
         } else if (task instanceof Epic e) {
-            return String.format("%d,SUBTASK,%s,%s,%s,%s,%s,",
+            return String.format("%d,EPIC,%s,%s,%s,%s,%s,",
                     task.getId(), name, task.getStatus(), desc, start, dur);
 
         } else {
             System.out.println(task.getStatus() + " " + task.getId());
-            return String.format("%d,SUBTASK,%s,%s,%s,%s,%s,",
+            return String.format("%d,TASK,%s,%s,%s,%s,%s,",
                     task.getId(), name, task.getStatus(), desc, start, dur);
         }
     }
