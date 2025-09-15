@@ -456,14 +456,16 @@ public class InMemoryTaskManager implements TaskManager {
                 SubTask st = (SubTask) entity;
                 subTaskHashMap.put(st.getId(), st);
                 prioritized.add(st);
+                return;
             } else if (isEpic) {
                 Epic e = (Epic) entity;
                 epicHashMap.put(e.getId(), e);
-
+                return;
             } else {
 
                 taskHashMap.put(entity.getId(), entity);
                 prioritized.add(entity);
+                return;
             }
         }
 

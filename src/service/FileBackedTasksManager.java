@@ -14,11 +14,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalInt;
-import java.util.stream.Collectors;
 
 public class FileBackedTasksManager extends InMemoryTaskManager implements TaskManager {
 
@@ -52,6 +49,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         }
     }
 
+    @Override
+    public List<Task> getPrioritizedTasks() {
+        return super.getPrioritizedTasks();
+    }
+
     private void load() {
 
         try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
@@ -61,13 +63,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
             int maxId = -1;
             String line;
             while ((line = reader.readLine()) != null && !line.isBlank()) {
-                String[] split = line.split(",");
+                String[] split = line.split(",", -1);
                 int id = Integer.parseInt(split[0]);
                 String name = split[2];
                 Status status = Status.valueOf(split[3]);
                 String description = split[4];
-                LocalDateTime startTime = split[5].isEmpty() ? null: LocalDateTime.parse(split[5], DATE_TIME_FMT);
-                Duration duration = split[6].isEmpty()? null: Duration.ofMinutes(Long.parseLong(split[6]));
+                LocalDateTime startTime = split[5].isEmpty() ? null : LocalDateTime.parse(split[5], DATE_TIME_FMT);
+                Duration duration = split[6].isEmpty() ? null : Duration.ofMinutes(Long.parseLong(split[6]));
                 switch (split[1]) {
                     case "SUBTASK" -> {
                         int epicId = Integer.parseInt(split[7]);

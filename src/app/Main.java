@@ -4,30 +4,35 @@ import model.Epic;
 import model.Status;
 import model.SubTask;
 import model.Task;
+import server.HttpTaskServer;
 import service.Managers;
 import service.TaskManager;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Scanner;
 
-import java.time.format.DateTimeFormatter;
-
 
 public class Main {
     private static final Scanner in = new Scanner(System.in);
-    private static final Path PATH = Paths.get("tasks.csv");
+    private static final Path PATH = Paths.get("task.csv");
     private static final TaskManager manager = Managers.getDefaultFileManager(PATH);
 
     private static final DateTimeFormatter DATE_TIME_FMT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        HttpTaskServer http = new HttpTaskServer(Path.of("task.csv"));
+        http.start();
+
+
         while (true) {
             printMenu();
             int cmd = readInt("Выберите пункт: ");
@@ -45,6 +50,7 @@ public class Main {
                 case 11 -> setStatus();
                 case 12 -> showById();
                 case 13 -> getHistory();
+                case 14 -> getPrioritizedTasks();
                 case 0 -> {
                     System.out.println("Пока!");
                     return;
@@ -70,6 +76,7 @@ public class Main {
         System.out.println("11. Изменить статус (Tasks/SubTasks)");
         System.out.println("12. Показать по id ( Task/ Epic/ SubTask)");
         System.out.println("13. Показать историю");
+        System.out.println("14. Показать отсортированный список задач");
         System.out.println("0. Выход");
     }
 
@@ -80,6 +87,15 @@ public class Main {
             return;
         }
         System.out.println(history);
+    }
+
+    private static void getPrioritizedTasks() {
+        List<Task> prioritized = manager.getPrioritizedTasks();
+        if (prioritized == null || prioritized.isEmpty()) {
+            System.out.println("список пуст");
+            return;
+        }
+        System.out.println(prioritized);
     }
 
 
@@ -108,7 +124,7 @@ public class Main {
         Epic e = new Epic();
         e.setName(readLine("Название эпика: "));
         e.setDescription(readLine("Описание: "));
-        OptionalInt id  = manager.addEpic(e);
+        OptionalInt id = manager.addEpic(e);
         if (id.isPresent()) {
             System.out.println("Task создан, id=" + id.getAsInt());
         } else {
@@ -135,7 +151,8 @@ public class Main {
             System.out.println("SubTask создан, id=" + id.getAsInt());
         } else {
             System.out.println("Задача НЕ создана: некорректные данные или пересечение по времени.");
-        };
+        }
+        ;
     }
 
 
