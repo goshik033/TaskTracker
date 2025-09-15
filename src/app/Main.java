@@ -9,6 +9,7 @@ import service.Managers;
 import service.TaskManager;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -29,7 +30,11 @@ public class Main {
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public static void main(String[] args) throws IOException {
-        HttpTaskServer http = new HttpTaskServer(Path.of("task.csv"));
+        server.KVServer kv = new server.KVServer();
+        kv.start();
+
+
+        HttpTaskServer http = new HttpTaskServer(URI.create("http://localhost:8078/"));
         http.start();
 
 

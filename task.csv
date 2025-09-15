@@ -9,6 +9,7 @@ id,type,name,status,description,start,dur,epic
 8,TASK,Demo Task,NEW,test,,,
 9,TASK,Demo Task,NEW,test,,,
 10,TASK,Demo Task,NEW,test,,,
+13,TASK,ee22e,NEW,4erere,,,
 11,EPIC,Release 1.0,NEW,Подготовка релиза,,,
 12,SUBTASK,Сверстать changelog,NEW,Секции features/fixes,2025-09-15 12:00,90,11
 

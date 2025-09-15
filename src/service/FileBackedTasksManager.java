@@ -39,7 +39,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         return manager;
     }
 
-    private void save() {
+    protected  void save() {
         try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
             writer.write(serializeToCsv());
             writer.flush();
@@ -54,7 +54,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager implements TaskM
         return super.getPrioritizedTasks();
     }
 
-    private void load() {
+    protected void load() {
 
         try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             String header = reader.readLine();

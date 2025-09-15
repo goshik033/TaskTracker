@@ -13,8 +13,8 @@ import service.TaskManager;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -40,18 +40,18 @@ public class HttpTaskServer {
             .create();
 
 
-    public HttpTaskServer(Path storagePath) throws IOException {
-        this.manager = Managers.getDefaultFileManager(storagePath);
+    public HttpTaskServer(URI kvUri) throws IOException {
+        this.manager = Managers.getDefaultHTTPManager(kvUri);
         this.server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
         server.createContext("/tasks/task", this::handleTask);
         server.createContext("/tasks/epic", this::handleEpic);
         server.createContext("/tasks/epic/subtasks", this::handleEpicSubtasks);
         server.createContext("/tasks/subtask", this::handleSubtask);
         server.createContext("/tasks/all", this::handleAll);
-        server.createContext("/tasks/", this::handlePrioritized);           // пункт 14
-        server.createContext("/tasks/history", this::handleHistory);       // пункт 13
-        server.createContext("/tasks/task/status", this::handleTaskStatus);        // пункт 11
-        server.createContext("/tasks/subtask/status", this::handleSubtaskStatus);  // пункт 11
+        server.createContext("/tasks/", this::handlePrioritized);
+        server.createContext("/tasks/history", this::handleHistory);
+        server.createContext("/tasks/task/status", this::handleTaskStatus);
+        server.createContext("/tasks/subtask/status", this::handleSubtaskStatus);
 
 
     }

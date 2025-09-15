@@ -1,5 +1,7 @@
 package service;
 
+import java.net.URI;
+import java.net.URL;
 import java.nio.file.Path;
 
 import static service.FileBackedTasksManager.loadFromFile;
@@ -17,5 +19,7 @@ public class Managers {
     }
     public static TaskManager getDefaultFileManager(Path path) {
         return FileBackedTasksManager.loadFromFile(path);
+    } public static TaskManager getDefaultHTTPManager(URI kvUri) {
+        return HTTPTaskManager.load(kvUri);
     }
 }
