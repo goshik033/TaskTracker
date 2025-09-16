@@ -29,3 +29,5 @@ bin/
 ### Mac OS ###
 .DS_Storelib/
 tests.csv
+lib/
+task.csv
